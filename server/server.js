@@ -1,12 +1,24 @@
-import http from 'http';
-// import cors from 'cors';
-import app from './app.js';
 
+import express from 'express';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import mongoose from 'mongoose';
 
-const port = process.env.PORT;
+dotenv.config();
 
-const server = http.createServer(app);
+const app = express();
 
-server.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
+// MongoDB pajungimas
+mongoose
+  .connect(process.env.URI)
+  .then(() => console.log('MongoDB Connected'))
+  .catch((error) => {
+    console.error(`Error: ${error.message}`);
+  });
+
+app.use(cors());
+app.use(express.json());
+
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
