@@ -3,26 +3,35 @@ import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import cors from 'cors';
+import productRoutes from './api/routes/products.js';
+import orderRoutes from './api/routes/orders.js';
+import fs from 'fs'
+import path from 'path'
 dotenv.config()
-
 
 const app = express();
 
-import productRoutes from './api/routes/products.js';
-import orderRoutes from './api/routes/orders.js';
+const ca = fs.readFileSync(path.resolve('../pem_files/ca.pem'));
 
 //mongoose DB connection
-mongoose.connect(process.env.MONGO_URI, {
+await mongoose.connect(process.env.MONGO_URI, {
+  
+  // tls: true,
+  // tlsCAFile: ca
+  // ssl: true,
+  // sslValidate: true,
+  // sslCA: fs.readFileSync(`../pem_files/ca.pem`)
 
 })
-.then(() => console.log("Connected to MongoDB"))
-.catch(err => console.error("Could not connect to MongoDB:", err));
-
+  .then(() => console.log('Connected to MongoDB with SSL'))
+  .catch((err) => console.error('MongoDB connection error:', err));
 
 
 
 //middleware
 app.use(morgan('dev'));
+app.use(cors())
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json())
 
@@ -57,6 +66,8 @@ app.use((error, req, res, next) => {
     })
 })
 
+//server port listen
+const PORT = process.env.PORT ;
 
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-export default app;
