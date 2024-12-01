@@ -31,8 +31,21 @@ function App() {
           <Route path="/booking/:id" element={<Booking />} />
           <Route path="/confirmation" element={<Confirmation />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path='/about' element={<AboutUs />} />
-          <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/admin" element={<AdminPanel />}>
+            <Route path="tools" element={<AdminTools />}>
+              <Route path="edit/:id" element={<AdminToolEditForm />} />
+              <Route path="new" element={<AdminToolNewForm />} />
+            </Route>
+            <Route path="reservations" element={<AdminReservations />}>
+              <Route path="edit/:id" element={<AdminReservationsEditForm />} />
+              {/* <Route path="new" element={< AdminReservationsNewForm/>} /> */}
+            </Route>
+            <Route path="users" element={<AdminUsers />}>
+              <Route path="edit/:id" element={<AdminUsersEditForm />} />
+              {/* <Route path="new" element={< AdminUsersNewForm/>} /> */}
+            </Route>
+          </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/terms" element={<TermsOfUse/>}/>
