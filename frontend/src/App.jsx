@@ -4,6 +4,13 @@ import ToolDetails from './pages/ToolDetails';
 import Booking from './pages/Booking';
 import Confirmation from './pages/Confirmation';
 import AdminPanel from './pages/AdminPanel';
+import AdminReservations from "./components/admin/AdminReservations";
+import AdminUsers from "./components/admin/AdminUsers";
+import AdminToolNewForm from "./components/admin/AdminToolNewForm";
+import AdminTools from "./components/admin/AdminTools";
+import AdminToolEditForm from "./components/admin/AdminToolEditForm";
+import AdminReservationsEditForm from "./components/admin/AdminReservationsEditForm";
+import AdminUsersEditForm from "./components/admin/AdminUsersEditForm";
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import Header from './components/Header';
@@ -14,9 +21,9 @@ import Tools from './pages/Tools';
 import Categories from './pages/Categories';
 import Contact from './pages/Contact';
 import AboutUs from './pages/AboutUs';
-import TermsOfUse from './pages/TermsOfUse';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import FAQ from './pages/FAQ';
+// import TermsOfUse from './pages/TermsOfUse';
+// import PrivacyPolicy from './pages/PrivacyPolicy';
+// import FAQ from './pages/FAQ';
 
 function App() {
   return (
@@ -48,9 +55,9 @@ function App() {
           </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/terms" element={<TermsOfUse/>}/>
-          <Route path="/privacy" element={<PrivacyPolicy/>}/>
-          <Route path="/faq" element={<FAQ/>}/>
+          {/* <Route path="/terms" element={<TermsOfUse/>}/> */}
+          {/* <Route path="/privacy" element={<PrivacyPolicy/>}/> */}
+          {/* <Route path="/faq" element={<FAQ/>}/> */}
         </Routes>
       </div>
       <ToastContainer position="top-right" autoClose={2000} hideProgressBar={false} newestOnTop={true} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="light" />

@@ -1,27 +1,33 @@
 import { useEffect, useState } from "react";
 import { Link, Outlet } from "react-router-dom";
-import AdminToolCard from "./AdminToolCard";
+import AdminReservationsCard from "./AdminReservationsCard";
 
 function AdminReservations() {
-  // const [orders, setProducts] = useState([]);
-  // const [order, setProduct] = useState({});
-  // const [childId, setChildId] = useState("");
+  const [reservations, setReservations] = useState([]);
+  const [reservation, setReservation] = useState({});
+  const token = localStorage.token;
 
-  // useEffect(() => {
-  //   fetch("http://localhost:3000/orders")
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       setProducts(data.products || []);
-  //     })
-  //     .catch((err) => console.error(err));
-  // }, []);
+  useEffect(() => {
+    fetch("http://localhost:3000/reservations",{          headers: {
+      method: "GET",
+      Authorization: `Bearer ${token}`,
+      "Content-type": "application/json",
+    },})
+      .then((res) => res.json())
+      .then((data) => {
+        setProducts(data.reservations || []);
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
 
 
 
   return (
+
     <>
-      {/* <div className="sticky top-0">
-        <Outlet context={[order]} />
+      <div className="sticky top-0">
+        <Outlet context={[reservation]} />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 space-y-4 bg-white p-6 rounded-lg shadow">
         <Link to="new">
@@ -30,12 +36,12 @@ function AdminReservations() {
             Įkelti naują
           </div>{" "}
         </Link>
-        {products.map((item) => {
+        {reservations.map((item) => {
           return (
-            <AdminToolCard item={item} passItem={setProduct} key={item._id} />
+            <AdminReservationsCard item={item} passItem={setReservations} key={item._id} />
           );
         })}
-      </div> */}
+      </div>
     </>
   );
 }

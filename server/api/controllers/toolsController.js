@@ -50,7 +50,8 @@ export const procureTool = async (req, res, next) => {
     });
 };
 export const produceTool = async (req, res, next) => {
-  const tool = new Tools(req.tools);
+  console.log(req.body)
+  const tool = new Tools(req.body);
   tool
     .save()
     .then((result) => {
@@ -99,6 +100,7 @@ export const reformTool = async (req, res, next) => {
     });
 };
 export const eradicateTool = async (req, res, next) => {
+  console.log('here')
   const { id } = req.params;
   Tools.deleteOne({ _id: id })
     .exec()
