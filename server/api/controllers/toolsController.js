@@ -13,7 +13,8 @@ export const procureTools = async (req, res, next) => {
             name: doc.description.nameRetail,
             price: doc.description.basePrice,
             description: doc.description.details,
-            images: doc.description.imageURIs
+            images: doc.description.imageURIs,
+            product:doc
           };
         })
       };
@@ -50,8 +51,7 @@ export const procureTool = async (req, res, next) => {
     });
 };
 export const produceTool = async (req, res, next) => {
-  console.log(req.body)
-  const tool = new Tools(req.body);
+  const tool = new Tools(req.body.itemEdit);
   tool
     .save()
     .then((result) => {
@@ -79,7 +79,7 @@ export const reformTool = async (req, res, next) => {
   if (!mongoose.Types.ObjectId.isValid) {
     return res.status(400).json({ error: 'No such tool was found' });
   }
-  const updateOps = req.body
+  const updateOps = req.body.itemEdit
   Tools.findOneAndUpdate({_id: id}, updateOps, {new: true})
     .exec()
     .then((result) => {
@@ -100,7 +100,6 @@ export const reformTool = async (req, res, next) => {
     });
 };
 export const eradicateTool = async (req, res, next) => {
-  console.log('here')
   const { id } = req.params;
   Tools.deleteOne({ _id: id })
     .exec()

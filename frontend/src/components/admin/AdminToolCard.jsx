@@ -6,7 +6,7 @@ function AdminToolCard({ item, passItem }) {
       <div
         className="flex flex-row align-middle border gap-4 p-2 h-22 border-gray-100 rounded-[10px]"
         onClick={() => {
-          passItem(item);
+          passItem(item.product);
         }}
       >
         <img src={item.images[0]} alt={item.name} className="size-24" />
