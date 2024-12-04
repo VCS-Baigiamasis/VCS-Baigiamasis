@@ -7,6 +7,7 @@ export const userSignup = async (req, res) => {
     try {
       // Apsaugom slaptazodi
       const encryptPwd = await bcrypt.hash(req.body.password, 10);
+      console.log(req.body)
   
       // Sukuriame nauja vartotoja su apsaugotu slaptazodziu
       const user = new User({
@@ -19,9 +20,8 @@ export const userSignup = async (req, res) => {
         address: req.body.address,
         role: req.body.role
       });
-  
       // Issaugom nauja vartotoja
-      const result = await user.save();
+      user.save();
       res.status(201).json({
         message: 'User created successfully'
       });
@@ -54,7 +54,9 @@ export const userLogin = async (req, res) => {
         token: token,
         userId: user._id,
         role: user.role,
-        name: user.name
+        name: user.name,
+        phoneNumber: user.phoneNumber,
+        email: user.email
       });
     } catch (error) {
       res.status(500).json({

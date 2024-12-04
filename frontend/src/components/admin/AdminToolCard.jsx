@@ -1,12 +1,13 @@
 import { Link, useOutletContext } from "react-router-dom";
 
 function AdminToolCard({ item, passItem }) {
+  console.log(item)
   return (
     <Link to={`edit/${item._id}`}>
       <div
         className="flex flex-row align-middle border gap-4 p-2 h-22 border-gray-100 rounded-[10px]"
         onClick={() => {
-          passItem(item.product);
+          passItem(item);
         }}
       >
         <img src={item.images[0]} alt={item.name} className="size-24" />
