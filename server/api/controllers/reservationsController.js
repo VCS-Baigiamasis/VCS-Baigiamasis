@@ -8,12 +8,7 @@ export const procureReservations = async (req, res) => {
   const { userId } = req.userData;
   try {
     // Suranda visas rezervacijas pagal userId
-    const reservations = await Reservation.find()
-      .populate('product', 'description nameRetail')
-      .select(
-        'product quantity dateRange _id toolType tool status pickupLocation contactName contactEmail contactPhone'
-      )
-      .exec();
+    const reservations = await Reservation.find().populate('product', 'description nameRetail').select('product quantity dateRange _id toolType tool status pickupLocation contactName contactEmail contactPhone').exec();
 
     // Grazina rezultata su rezervaciju sarasu
     res.status(200).json({
@@ -43,9 +38,7 @@ export const procureReservations = async (req, res) => {
 };
 export const procureReservation = async (req, res) => {
   try {
-    const reservation = await Reservation.findById(req.params.reservationId)
-      .populate('product', 'description nameRetail')
-      .exec();
+    const reservation = await Reservation.findById(req.params.reservationId).populate('product', 'description nameRetail').exec();
     if (!reservation) {
       return res.status(404).json({ message: 'Reservation not found' });
     }
@@ -59,8 +52,7 @@ export const procureReservation = async (req, res) => {
 export const procureUserReservations = async (req, res) => {
   try {
     const reservations = await Reservation.find({
-      userId: req.params.userId,
-      status: { $in: ['Pending', 'Active'] } // Only get active and pending reservations
+      userId: req.params.userId
     })
       .populate('product', 'description.nameRetail')
       .exec();
@@ -210,7 +202,7 @@ export const reformReservation = async (req, res) => {
 
     res.status(200).json({
       message: 'Reservation updated successfully',
-      reservation: updatedReservation,
+      reservation: updatedReservation
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -220,7 +212,7 @@ export const reformReservation = async (req, res) => {
 export const procureByProductId = async (req, res) => {
   try {
     const reservations = await Reservation.find({
-      product: req.params.productId,
+      product: req.params.productId
     })
       .select('dateRange')
       .exec();
@@ -228,8 +220,8 @@ export const procureByProductId = async (req, res) => {
     res.status(200).json({
       reservations: reservations.map((reservation) => ({
         from: reservation.dateRange.from,
-        to: reservation.dateRange.to,
-      })),
+        to: reservation.dateRange.to
+      }))
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
