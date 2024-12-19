@@ -2,6 +2,7 @@ import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { AuthContext } from '../../context/AuthContext';
+import BaseAxios from '../../hooks/axiosConfig';
 
 const SignupForm = () => {
   const { register } = useContext(AuthContext);
@@ -60,29 +61,18 @@ const SignupForm = () => {
       address
     };
 
-    try {
-      const response = await fetch('http://localhost:3000/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
+    BaseAxios.post('auth/signup', formData, {method: "POST"})
+    .then((res) => {
+      if (res.statusText === "Created") {
         register();
         navigate('/login');
       } else {
-        toast.error(data.message || 'Registration failed');
-        setEmptyFields(data.message);
+        toast.error(res.data.message || 'Registration failed');
+        setEmptyFields(res.data.message);
       }
-    } catch (error) {
-      console.log('Error details:', error);
-      toast.error('Server error. Please try again later.');
-    }
-    setIsSubmitted(false);
+    })
+    .catch((err) => {toast.error('Server error. Please try again later.'); console.log('Error details:', err)})
+    .finally(() => setIsSubmitted(false))
   };
 
   const maxDate = () => {

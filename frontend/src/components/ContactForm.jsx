@@ -3,6 +3,7 @@ import { Icon } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
+import BaseAxios from '../hooks/axiosConfig';
 
 const ContactForm = () => {
   const [email, setEmail] = useState('');
@@ -15,33 +16,19 @@ const ContactForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    try {
-      const response = await fetch('http://localhost:3000/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          email,
-          phoneNumber,
-          message
-        })
-      });
-
-      if (response.ok) {
-        toast.success('Message sent successfully!');
-        setEmail('');
-        setPhoneNumber('');
-        setMessage('');
-      } else {
-        toast.error('Failed to send message');
-      }
-    } catch (error) {
-      toast.error('Server error. Please try again later.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    BaseAxios.post('contact', {email, phoneNumber,message}, {method: "POST"})
+      .then((res) => {
+        if (res.statusText === "OK") {
+          toast.success('Message sent successfully!');
+          setEmail('');
+          setPhoneNumber('');
+          setMessage('');
+        } else {
+          toast.error('Failed to send message');
+        }
+      })
+      .catch((err) => {toast.error("Server failure check logs"); console.log(err)})
+      .finally(() => setIsSubmitting(false))
   };
 
   return (

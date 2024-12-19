@@ -1,20 +1,20 @@
 import { useEffect, useState } from "react";
 import { Link, Outlet } from "react-router-dom";
 import AdminToolCard from "./AdminToolCard";
+import BaseAxios from "../../hooks/axiosConfig";
+import { toast } from "react-toastify";
 
 function AdminTools() {
   const [products, setProducts] = useState([]);
   const [product, setProduct] = useState({});
 
   useEffect(() => {
-    fetch("http://localhost:3000/tools")
-      .then((res) => res.json())
-      .then((data) => {
-        setProducts(data.tools || []);
+    BaseAxios.get('tools')
+      .then((req) => {
+        setProducts(req.data.tools || []);
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {toast.error("Failed loading tools, check console");console.log(err)})
   }, []);
-  console.log(products)
   return (
     <>
       <div className="sticky top-0">

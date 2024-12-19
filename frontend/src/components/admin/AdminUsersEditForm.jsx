@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useOutletContext } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import BaseAxios from '../../hooks/axiosConfig';
 
 const AdminUsersEditForm = () => {
   const { id } = useParams();
@@ -28,38 +29,31 @@ const AdminUsersEditForm = () => {
   }, [id]);
 
   const fetchUser = async () => {
-    try {
-      const response = await fetch(`http://localhost:3000/api/users/${id}`);
-      const data = await response.json();
-
-      setFormData({
-        name: data.name,
-        email: data.email,
-        phoneNumber: data.phoneNumber,
-        dateOfBirth: data.dateOfBirth.split('T')[0],
-        address: data.address,
-        role: data.role
-      });
-    } catch (error) {
-      toast.error('Failed to fetch user data');
-      navigate('/admin/users');
-    }
+    BaseAxios.get(`api/users/${id}`)
+      .then((res) => {
+        setFormData({
+          name: res.data.name,
+          email: res.data.email,
+          phoneNumber: res.data.phoneNumber,
+          dateOfBirth: res.data.dateOfBirth.split('T')[0],
+          address: res.data.address,
+          role: res.data.role
+        });
+      })
+      .catch((err) => {toast.error('Failed to fetch user data'); navigate('/admin/users'); console.log(err)})
   };
 
   const fetchUserReservations = async () => {
-    try {
-      const response = await fetch(`http://localhost:3000/reservations/user/${id}?status=active`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      const data = await response.json();
-      const sortedReservations = Array.isArray(data) ? data.sort((a, b) => b._id.localeCompare(a._id)) : [];
-      setUserReservations(sortedReservations);
-    } catch (error) {
-      toast.error('Failed to fetch reservations');
-      setUserReservations([]);
-    }
+    BaseAxios.get(`reservations/user/${id}?status=active`)
+      .then((req)=>{
+        const sortedReservations = Array.isArray(req.data) ? req.data.sort((a, b) => b._id.localeCompare(a._id)) : [];
+        setUserReservations(sortedReservations);
+      })
+      .catch((err) => {
+        toast.error('Failed to fetch reservations');
+        console.log(err)
+        setUserReservations([]);
+      })
   };
 
   const handleChange = (e) => {
@@ -72,31 +66,32 @@ const AdminUsersEditForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await fetch(`http://localhost:3000/api/users/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
-
-      if (response.ok) {
-        refreshUsers();
-        toast.success('User updated successfully');
-        navigate('/admin/users');
-      } else {
-        throw new Error('Failed to update user');
-      }
-    } catch (error) {
-      toast.error(error.message || 'Failed to update user');
-    }
+    BaseAxios.put(`api/users/${id}`, formData, {method: "PUT"})
+      .then(() => {
+          refreshUsers();
+          toast.success('User updated successfully');
+          navigate('/admin/users');
+      })
+      .catch((err) => {
+        toast.error(err.message || 'Failed to update user');
+      })
   };
 
   const handleDeleteReservation = async (reservationId) => {
     if (window.confirm('Are you sure you want to delete this reservation?')) {
+      BaseAxios.delete(`reservations/${reservationId}`, {method: "DELETE", credentials: 'include'})
+        .then(()=>{
+          setUserReservations((prev) => prev.filter((res) => res._id !== reservationId));
+          toast.success('Reservation deleted successfully');
+        })
+        .catch((err) => {
+          toast.error(err.message);
+          console.log(err)
+        })
+      /*
       try {
-        const response = await fetch(`http://localhost:3000/reservations/${reservationId}`, {
+        // When testing on your home network use the ip address of the computer thats hosting the api server otherwise use localhost
+        const response = await fetch(`http://192.168.0.21:3000/reservations/${reservationId}`, {
           method: 'DELETE',
           credentials: 'include'
         });
@@ -108,6 +103,7 @@ const AdminUsersEditForm = () => {
       } catch (error) {
         toast.error(error.message);
       }
+        */
     }
   };
 

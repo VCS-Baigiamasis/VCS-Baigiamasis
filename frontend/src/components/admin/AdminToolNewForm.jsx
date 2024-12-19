@@ -1,10 +1,11 @@
-import { Link, useOutletContext } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { JsonEditor } from "json-edit-react";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import BaseAxios from "../../hooks/axiosConfig";
 
 function AdminToolNewForm() {
   const [itemEdit, setItemEdit] = useState({});
-  const token = localStorage.token;
   const jsonTemplate = {
     toolType: "string",
     description: {
@@ -23,37 +24,32 @@ function AdminToolNewForm() {
     isVisible: false,
     isDraft: true,
   };
-
+/*
   useEffect(() => {
     console.log("First check", itemEdit);
   }, [itemEdit]);
-
+*/
+  function refreshPage() {
+    window.location.reload()
+  }
   const handleItemPost = async (e) => {
     e.preventDefault();
-    try {
-      const response = await fetch(`http://localhost:3000/tools/`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-type": "application/json",
-        },
-        body: JSON.stringify({
-          itemEdit,
-        }),
-      });
-      console.log("This string:", itemEdit)
-      const data = await response.json();
-      if (response.ok) {
-        console.log("Post success:", data);
-      }
-    } catch (error) {
-      console.error("Post failed:", error);
-    }
+    console.log(itemEdit)
+    BaseAxios.post('tools/', itemEdit, {method: "POST"})
+      .then(() => {
+        toast(`Tool created, page will refresh in 2 seconds to update tool list`)
+        //setTimeout(refreshPage, 2500)
+      })
+      .catch((err) => {
+        toast.error("Failed to create tool check logs")
+        console.log(err)
+      })
   };
-
+/*
   useEffect(() => {
     console.log("Second check:", itemEdit);
   }, [itemEdit]);
+*/
 
   return (
     <div className="space-y-4 bg-white p-6 rounded-lg shadow">

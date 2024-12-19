@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useOutletContext } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import BaseAxios from '../../hooks/axiosConfig';
 
 const AdminReservationEditForm = () => {
   const { id } = useParams();
@@ -26,8 +27,30 @@ const AdminReservationEditForm = () => {
   }, [id]);
 
   const fetchReservation = async () => {
+    BaseAxios.get(`reservations/${id}`)
+      .then((req) => {
+        setFormData({
+          contactName: req.data.reservation.contactName,
+          contactEmail: req.data.reservation.contactEmail,
+          contactPhone: req.data.reservation.contactPhone,
+          pickupLocation: req.data.reservation.pickupLocation,
+          quantity: req.data.reservation.quantity,
+          dateRange: {
+            from: req.data.reservation.dateRange.from.split('T')[0],
+            to: req.data.reservation.dateRange.to.split('T')[0]
+          },
+          status: req.data.reservation.status
+        });
+        setLoading(false);
+      })
+      .catch((err) => {
+        toast.error('Failed to fetch reservation:',err);
+        navigate('/admin/reservations');
+      })
+/*
     try {
-      const response = await fetch(`http://localhost:3000/reservations/${id}`, {
+      // When testing on your home network use the ip address of the computer thats hosting the api server otherwise use localhost
+      const response = await fetch(`http://192.168.0.18:3000/reservations/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
@@ -50,6 +73,7 @@ const AdminReservationEditForm = () => {
       toast.error('Failed to fetch reservation');
       navigate('/admin/reservations');
     }
+*/
   };
 
   const handleChange = (e) => {
@@ -73,26 +97,15 @@ const AdminReservationEditForm = () => {
   console.log(formData);
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await fetch(`http://localhost:3000/reservations/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(formData)
-      });
-
-      if (response.ok) {
-        refreshReservations();
-        toast.success('Reservation updated successfully');
-        navigate('/admin/reservations');
-      } else {
-        throw new Error('Failed to update reservation');
-      }
-    } catch (error) {
-      toast.error(error.message);
-    }
+    BaseAxios.put(`reservations/${id}`, formData, {method: "PUT"})
+      .then(() => {
+        refreshReservations()
+        toast.success('Reservation updated succesfully')
+        navigate('admin/reservations')
+      })
+      .catch((err) => {
+        toast.error(err.nessage)
+      })
   };
 
   if (loading) {

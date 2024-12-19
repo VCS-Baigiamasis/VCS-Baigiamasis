@@ -6,6 +6,7 @@ import { Navigate, useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import Map from './Map';
 import { toast } from 'react-toastify';
+import BaseAxios from '../hooks/axiosConfig';
 
 function ReservationForm({ onSubmit }) {
   const { user } = useContext(AuthContext);
@@ -44,31 +45,27 @@ function ReservationForm({ onSubmit }) {
   useEffect(() => {
     const fetchStoresLocations = async () => {
       setIsLoading(true);
-      try {
-        const response = await fetch('http://localhost:3000/stores');
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const data = await response.json();
-        const pullArray = data.stores.map((store) => store.location_city);
-        setPickupLocations(pullArray);
-        setData_send(data);
-      } catch (error) {
-        setFetchError('Failed to load stores. Please try again later.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
+      BaseAxios.get('stores')
+        .then((req) => {
+          console.log(req)
+          const pullArray = req.data.stores.map((store) => store.location_city);
+          setPickupLocations(pullArray);
+          setData_send(req.data);
+        })
+        .catch((err) => {toast.error("Something went wrong check console"); console.log(err)})
+        .finally(() => {
+          setIsLoading(false)
+        })
+    }
     fetchStoresLocations();
   }, []);
 
   useEffect(() => {
     const fetchProducts = async () => {
-      try {
-        const response = await fetch('http://localhost:3000/tools');
-        const data = await response.json();
-        const categorized = {};
-
-        data.tools.forEach((product) => {
+      BaseAxios.get('tools')
+        .then((req)=> {
+          const categorized = {};
+          req.data.tools.forEach((product) => {
           const toolType = product.toolType;
           if (!categorized[toolType]) {
             categorized[toolType] = [];
@@ -81,7 +78,7 @@ function ReservationForm({ onSubmit }) {
         });
 
         setCategories(categorized);
-        const exactTool = data.tools.find((t) => t.name.trim() === toolName?.trim());
+        const exactTool = req.data.tools.find((t) => t.name.trim() === toolName?.trim());
 
         if (exactTool) {
           setTools(categorized[exactTool.toolType] || []);
@@ -93,9 +90,8 @@ function ReservationForm({ onSubmit }) {
             quantity: quantity
           }));
         }
-      } catch (error) {
-        setFetchError('Failed to load products');
-      }
+        })
+        .catch((err) => {toast.error("Failed to obtain tools check console!"); console.log(err)})
     };
 
     fetchProducts();
@@ -111,14 +107,13 @@ function ReservationForm({ onSubmit }) {
 
   useEffect(() => {
     if (formData.tool) {
-      fetch(`http://localhost:3000/tools/${formData.tool}`)
-        .then((res) => res.json())
-        .then((data) => {
-          setBasePrice(data.product.description.basePrice);
-          calculateTotalPrice(data.product.description.basePrice, formData.quantity);
-        });
-    }
-  }, [formData.tool]);
+      BaseAxios(`tools/${formData.tool}`)
+        .then((req) => {
+          setBasePrice(req.data.product.description.basePrice);
+          calculateTotalPrice(req.data.product.description.basePrice, formData.quantity);
+        })
+        .catch((err) => {toast.error("Something went wrong check logs"); console.log(err)})
+  }}, [formData.tool]);
 
   useEffect(() => {
     if (basePrice && formData.quantity && formData.startDate && formData.endDate) {
@@ -129,26 +124,16 @@ function ReservationForm({ onSubmit }) {
   }, [basePrice, formData.quantity, formData.startDate, formData.endDate]);
 
   const fetchReservationsForTool = async (toolId) => {
-    try {
-      const response = await fetch(`http://localhost:3000/reservations/product/${toolId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      const data = await response.json();
-
-      if (response.ok) {
-        const disabledDateRanges = data.reservations.map((reservation) => ({
-          startDate: new Date(reservation.from),
-          endDate: new Date(reservation.to)
-        }));
-        setDisabledDates(disabledDateRanges);
-      } else {
-        console.error('Error fetching reservations:', data.error);
-      }
-    } catch (error) {
-      console.error('Error fetching reservations:', error);
-    }
+    BaseAxios.get(`reservations/product/${toolId}`)
+      .then((req) => {
+        if (req.status) {
+          const disabledDateRanges = req.data.reservations.map((reservation) => ({
+            startDate: new Date(reservation.from),
+            endDate: new Date(reservation.to)
+          }));
+          setDisabledDates(disabledDateRanges);
+      }})
+      .catch((err) => {toast.error("Error occurred check console"); console.log(err)})
   };
 
   const validatePhone = (phoneNumber) => {
@@ -250,28 +235,15 @@ function ReservationForm({ onSubmit }) {
       }
     };
 
-    try {
-      const response = await fetch('http://localhost:3000/reservations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        onSubmit(result);
-      } else {
-        const errorData = await response.json();
-        toast.error('Failed to submit reservation. Please try again.');
-      }
-    } catch (error) {
-      toast.error('An error occurred while submitting your reservation. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    BaseAxios.post('/reservations', payload, {method: 'POST'})
+    .then((result) => {
+     toast.success('Reservation created!')
+     onSubmit(result.data)
+    })
+    .catch((err) => {toast.error("Failed to create reservation check console"); console.log(err)})
+    .finally(() => {
+     setLoading(false)
+    })
   };
 
   const calculateTotalPrice = (price, qty) => {

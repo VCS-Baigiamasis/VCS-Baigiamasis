@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import AdminReservationsNewForm from './AdminReservationsNewForm';
+import BaseAxios from '../../hooks/axiosConfig';
 
 const AdminReservations = () => {
   const [reservations, setReservations] = useState([]);
@@ -13,16 +14,11 @@ const AdminReservations = () => {
 
   const fetchReservations = async () => {
     try {
-      const response = await fetch('http://localhost:3000/reservations', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      const data = await response.json();
-
+      // When testing on your home network use the ip address of the computer thats hosting the api server otherwise use localhost
+      const req = await BaseAxios.get('reservations')
       // Turetu tikrint ar rezervacija pasibaige. Jei rezervacija pasibaige, tada keiciame statusu i Completed.
       const updatedReservations = await Promise.all(
-        data.reservations.map(async (reservation) => {
+        req.data.reservations.map(async (reservation) => {
           const endDate = new Date(reservation.dateRange.to);
           const currentDate = new Date();
 
@@ -33,7 +29,6 @@ const AdminReservations = () => {
           return reservation;
         })
       );
-
       const sortedReservations = updatedReservations.sort((a, b) => b._id.localeCompare(a._id));
       setReservations(sortedReservations);
       setLoading(false);
@@ -48,32 +43,22 @@ const AdminReservations = () => {
   }, []);
 
   const handleStatusUpdate = async (reservationId, newStatus) => {
-    try {
-      const response = await fetch(`http://localhost:3000/reservations/${reservationId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ status: newStatus })
-      });
-
-      if (response.ok) {
+    BaseAxios.put(`reservations/${reservationId}`, { status: newStatus}, {method: "PUT"})
+      .then(() => {
         toast.success(`Reservation ${newStatus.toLowerCase()}`);
         fetchReservations();
-      } else {
-        throw new Error('Failed to update reservation status');
-      }
-    } catch (error) {
-      toast.error(error.message);
-    }
+      })
+      .catch((err) => {
+        toast.error(err.message)
+      })
   };
 
   // Trinti rezervacija per pagrindini admin puslapi
   const handleDelete = async (reservationId) => {
     if (window.confirm('Are you sure you want to delete this reservation?')) {
       try {
-        const response = await fetch(`http://localhost:3000/reservations/${reservationId}`, {
+        // When testing on your home network use the ip address of the computer thats hosting the api server otherwise use localhost
+        const response = await fetch(`http://192.168.0.21:3000/reservations/${reservationId}`, {
           method: 'DELETE',
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
