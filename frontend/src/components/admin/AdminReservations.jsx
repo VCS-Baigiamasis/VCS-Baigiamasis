@@ -56,22 +56,15 @@ const AdminReservations = () => {
   // Trinti rezervacija per pagrindini admin puslapi
   const handleDelete = async (reservationId) => {
     if (window.confirm('Are you sure you want to delete this reservation?')) {
-      try {
-        // When testing on your home network use the ip address of the computer thats hosting the api server otherwise use localhost
-        const response = await fetch(`http://192.168.0.21:3000/reservations/${reservationId}`, {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-
-        if (response.ok) {
+      BaseAxios.delete(`reservations/${reservationId}`, {method: "DELETE"})
+        .then(() => {
           setReservations(reservations.filter((res) => res._id !== reservationId));
           toast.success('Reservation deleted successfully');
-        }
-      } catch (error) {
-        toast.error('Failed to delete reservation');
-      }
+        })
+        .catch((err) => {
+          toast.error('Failed to delete reservation');
+          console.log(err)
+        })
     }
   };
 

@@ -83,32 +83,6 @@ const AdminReservationsNewForm = ({ onClose }) => {
         console.log('Error details:', err);
         toast.error(err.essage);
       })
-    /*
-    try {
-      // When testing on your home network use the ip address of the computer thats hosting the api server otherwise use localhost
-      const response = await fetch('http://192.168.0.21:3000/reservations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(requestData)
-      });
-
-      const data = await response.json();
-      console.log('Server response:', data);
-
-      if (response.ok) {
-        toast.success('Reservation created successfully');
-        navigate('/admin/reservations');
-      } else {
-        throw new Error(data.message || 'Failed to create reservation');
-      }
-    } catch (error) {
-      console.log('Error details:', error);
-      toast.error(error.message);
-    }
-      */
   };
 
   const handleChange = (e) => {

@@ -47,33 +47,6 @@ const AdminReservationEditForm = () => {
         toast.error('Failed to fetch reservation:',err);
         navigate('/admin/reservations');
       })
-/*
-    try {
-      // When testing on your home network use the ip address of the computer thats hosting the api server otherwise use localhost
-      const response = await fetch(`http://192.168.0.18:3000/reservations/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      const data = await response.json();
-      setFormData({
-        contactName: data.reservation.contactName,
-        contactEmail: data.reservation.contactEmail,
-        contactPhone: data.reservation.contactPhone,
-        pickupLocation: data.reservation.pickupLocation,
-        quantity: data.reservation.quantity,
-        dateRange: {
-          from: data.reservation.dateRange.from.split('T')[0],
-          to: data.reservation.dateRange.to.split('T')[0]
-        },
-        status: data.reservation.status
-      });
-      setLoading(false);
-    } catch (error) {
-      toast.error('Failed to fetch reservation');
-      navigate('/admin/reservations');
-    }
-*/
   };
 
   const handleChange = (e) => {

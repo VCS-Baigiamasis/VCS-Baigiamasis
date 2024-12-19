@@ -88,22 +88,6 @@ const AdminUsersEditForm = () => {
           toast.error(err.message);
           console.log(err)
         })
-      /*
-      try {
-        // When testing on your home network use the ip address of the computer thats hosting the api server otherwise use localhost
-        const response = await fetch(`http://192.168.0.21:3000/reservations/${reservationId}`, {
-          method: 'DELETE',
-          credentials: 'include'
-        });
-
-        if (!response.ok) throw new Error('Failed to delete reservation');
-
-        setUserReservations((prev) => prev.filter((res) => res._id !== reservationId));
-        toast.success('Reservation deleted successfully');
-      } catch (error) {
-        toast.error(error.message);
-      }
-        */
     }
   };
 
