@@ -1,6 +1,7 @@
 import { MapContainer, TileLayer, Marker, Popup} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
 const Map = ({data, current_location, pickupAddress}) => {
   const [geolocation, setGeoLocation] = useState([]);
@@ -57,7 +58,7 @@ const sendAddress = (address) => {
               <Marker key={store._id} position={store.geo_location}>
                 <Popup>
                   {store.store_name} <br /> {store.address} <br />
-                  <button name='pickupLocation' value={store.address} onClick={() => sendAddress(store.address)}>Select this store</button>
+                  <button className='relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-purple-600 to-blue-500 group-hover:from-purple-600 group-hover:to-blue-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800' name='pickupLocation' value={store.address} onClick={(e) => {e.preventDefault(); sendAddress(store.address); toast(`Selected pickup point: ${store.address}`, {position: "top-right",autoClose: 5000, hideProgressBar: false, closeOnClick: false, pauseOnHover: true, draggable: true, progress: undefined, theme: "light",})}}>Select this store</button>
                 </Popup>
               </Marker>
             ))}

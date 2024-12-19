@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import BaseAxios from '../../hooks/axiosConfig';
 
 const AdminReservationsNewForm = ({ onClose }) => {
   const navigate = useNavigate();
@@ -24,52 +25,38 @@ const AdminReservationsNewForm = ({ onClose }) => {
   const [isManualEntry, setIsManualEntry] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/users', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setUsers(data);
+    BaseAxios.get('api/users')
+      .then((req) => {
+        setUsers(req.data)
       })
       .catch((err) => {
-        toast.error('Failed to fetch users');
-      });
+        toast.error('Failer to fetch users')
+        console.log(err)
+      })
   }, []);
 
   useEffect(() => {
-    fetch('http://localhost:3000/stores', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        // console.log('Stores data:', data);
-        setLocations(data.stores);
+    BaseAxios.get('stores')
+      .then((req) => {
+        setLocations(req.data.stores)
       })
       .catch((err) => {
         toast.error('Failed to fetch locations');
-      });
+        console.log(err)
+      })
   }, []);
 
   useEffect(() => {
-    fetch('http://localhost:3000/tools', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        // console.log('Tools data:', data);
-        setTools(data.tools);
-        setLoading(false);
+    BaseAxios.get('tools')
+      .then((req) => {
+        setTools(req.data.tools)
+        setLoading(false)
       })
       .catch((err) => {
         toast.error('Failed to fetch tools');
         setLoading(false);
-      });
+        console.log(err)
+      })
   }, []);
 
   const handleSubmit = async (e) => {
@@ -87,29 +74,15 @@ const AdminReservationsNewForm = ({ onClose }) => {
 
     console.log('Sending reservation data:', requestData);
 
-    try {
-      const response = await fetch('http://localhost:3000/reservations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(requestData)
-      });
-
-      const data = await response.json();
-      console.log('Server response:', data);
-
-      if (response.ok) {
-        toast.success('Reservation created successfully');
-        navigate('/admin/reservations');
-      } else {
-        throw new Error(data.message || 'Failed to create reservation');
-      }
-    } catch (error) {
-      console.log('Error details:', error);
-      toast.error(error.message);
-    }
+    BaseAxios.post('reservations', requestData, {method: "POST"})
+      .then(() => {
+        toast.success('Reservation created succesfully')
+        navigate('/admin/reservations')
+      })
+      .catch((err) => {
+        console.log('Error details:', err);
+        toast.error(err.essage);
+      })
   };
 
   const handleChange = (e) => {

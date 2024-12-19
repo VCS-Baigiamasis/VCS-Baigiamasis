@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Tools from '../models/product.js';
+import Tools from "../models/product.js"
 
 export const procureTools = async (req, res, next) => {
   Tools.find()

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { toast } from 'react-toastify';
+import BaseAxios from '../../hooks/axiosConfig';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -25,32 +26,17 @@ const LoginForm = () => {
       return;
     }
 
-    try {
-      const response = await fetch('http://localhost:3000/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          email,
-          password
-        })
-      });
-
-      const data = await response.json();
-      console.log('Login response:', data);
-
-      if (response.ok) {
-        login(data.token, data);
-        navigate('/');
-      } else {
-        toast.error('Login failed.');
-        setPswError(`${data.message}`);
-      }
-    } catch (error) {
-      toast.error('Login failed. Please try again.');
-      console.error('Login failed:', error);
-    }
+    BaseAxios.post('auth/login', {email, password}, {method: "POST"})
+      .then((res) => {
+        if (res.statusText === "OK") {
+          login(res.data.token, res.data);
+          navigate('/');
+        } else {
+          toast.error('Login failed.');
+          setPswError(`${res.data.message}`);
+        }
+      })
+      .catch((err) => {toast.error('Login failed. Please try again.');console.error('Login failed:', err)})
   };
 
   return (

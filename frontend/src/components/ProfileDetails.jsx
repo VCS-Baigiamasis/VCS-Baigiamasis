@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { toast } from 'react-toastify';
 import { useLocation } from 'react-router-dom';
+import BaseAxios from '../hooks/axiosConfig';
 
 function ProfileDetails() {
   const location = useLocation();
@@ -20,7 +21,7 @@ function ProfileDetails() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
-    console.log('Current user:', user);
+    //console.log('Current user:', user);
     if (user && (user.userId || user._id)) {
       const id = user.userId || user._id;
       //   console.log('Fetching user details for:', id);
@@ -29,27 +30,20 @@ function ProfileDetails() {
   }, [user, location]);
 
   const fetchUserDetails = async (id) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/api/users/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      const userData = await response.json();
-      setFormData({
-        name: userData.name,
-        email: userData.email,
-        phoneNumber: userData.phoneNumber,
-        dateOfBirth: new Date(userData.dateOfBirth).toISOString().split('T')[0],
-        address: userData.address,
-        password: '',
-        confirmPassword: ''
-      });
-    } catch (error) {
-      toast.error('Failed to fetch profile data');
-    }
+    BaseAxios.get(`api/users/${id}`)
+      .then((req) => {
+        const userData = req.data
+        setFormData({
+          name: userData.name,
+          email: userData.email,
+          phoneNumber: userData.phoneNumber,
+          dateOfBirth: new Date(userData.dateOfBirth).toISOString().split('T')[0],
+          address: userData.address,
+          password: '',
+          confirmPassword: ''
+        });
+      })
+      .catch((err) => {toast.error("Failed to obtain User data"); console.log(err)})
   };
 
   const handleSubmit = async (e) => {
@@ -59,28 +53,18 @@ function ProfileDetails() {
       toast.error('Passwords do not match');
       return;
     }
-
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/api/users/${user.userId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          phoneNumber: formData.phoneNumber,
-          dateOfBirth: formData.dateOfBirth,
-          address: formData.address,
-          password: formData.password || undefined
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
+    BaseAxios.put(`api/users/${user._id}`, {
+      name: formData.name,
+      email: formData.email,
+      phoneNumber: formData.phoneNumber,
+      dateOfBirth: formData.dateOfBirth,
+      address: formData.address,
+      password: formData.password || undefined
+    }, {method: "PUT"})
+      .then((res) => {
+        const data = res.data;
+        console.log(res)
+      if (res.statusText === 'OK') {
         localStorage.setItem('token', data.token);
         localStorage.setItem(
           'profileFormData',
@@ -98,12 +82,9 @@ function ProfileDetails() {
           password: '',
           confirmPassword: ''
         }));
-      } else {
-        throw new Error(data.message || 'Update failed');
       }
-    } catch (error) {
-      toast.error(error.message || 'Failed to update profile');
-    }
+      })
+      .catch((err)=> {toast.error("Update failed!"); console.log(err)})
   };
 
   return (

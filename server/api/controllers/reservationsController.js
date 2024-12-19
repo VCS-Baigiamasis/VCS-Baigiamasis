@@ -52,7 +52,8 @@ export const procureReservation = async (req, res) => {
 export const procureUserReservations = async (req, res) => {
   try {
     const reservations = await Reservation.find({
-      userId: req.params.userId
+      userId: req.params.userId,
+      status: { $in: ['Pending', 'Active', 'Completed', 'Declined'] } // Only get the required reservations, add or remove status
     })
       .populate('product', 'description.nameRetail')
       .exec();

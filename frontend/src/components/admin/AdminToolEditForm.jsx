@@ -1,6 +1,8 @@
 import { Link, useOutletContext } from "react-router-dom";
 import { JsonEditor } from "json-edit-react";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import BaseAxios from "../../hooks/axiosConfig";
 
 function AdminToolEditForm() {
   const [product] = useOutletContext();
@@ -8,51 +10,32 @@ function AdminToolEditForm() {
   const token = localStorage.token;
   const handleItemPatch = async (e) => {
     e.preventDefault();
-    try {
-      const response = await fetch(
-        `http://localhost:3000/tools/${itemEdit._id}`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-type": "application/json",
-          },
-          body: JSON.stringify({
-            itemEdit,
-          }),
-        }
-      );
-      const data = await response.json();
-      console.log(response)
-      if (response.ok) {
-        console.log("Patch success:", data);
-      }
-    } catch (error) {
-      console.error("Patch failed:", error);
-    }
+    BaseAxios.patch(`tools/${itemEdit._id}`, itemEdit, {method:"PATCH"})
+      .then(() => {
+        toast.success("Reformed tool, page refresh in 2 seconds")
+        setTimeout(() => {
+          window.location.reload()
+        }, 2500);
+      })
+      .catch((err) => {
+     console.error("Patch failed:", err);
+     toast.error("Failed to update tool")
+      })
   };
   const handleItemDelete = async (e) => {
     e.preventDefault();
-    try {
-      const response = await fetch(
-        `http://localhost:3000/tools/${itemEdit._id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            itemEdit,
-          }),
-        }
-      );
-      const data = await response.json();
-      if (response.ok) {
-        console.log("Delete success:", response);
-      }
-    } catch (error) {
-      console.error("Delete failed:", error);
-    }
+    BaseAxios.delete(`tools/${itemEdit._id}`, itemEdit, {method:"DELETE"})
+      .then(() => {
+         //console.log("Delete success:", response);
+        toast.success("Eradication successfull, page refresh in 2 seconds")
+        setTimeout(() => {
+          window.location.reload()
+        }, 2500);
+      })
+      .catch((err) => {
+      console.log("Delete failed:", err);
+      toast.error("Something went wrong, tool was not updated!")
+      })
   };
 
   useEffect(() => {

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import BaseAxios from '../../hooks/axiosConfig';
 
 const AdminUsersNewForm = ({ onClose, refreshUsers }) => {
   const [formData, setFormData] = useState({
@@ -22,30 +23,17 @@ const AdminUsersNewForm = ({ onClose, refreshUsers }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-
-    try {
-      const response = await fetch('http://localhost:3000/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(formData)
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success('User created successfully!');
-        refreshUsers();
-        onClose();
-      } else {
-        toast.error(data.message || 'Failed to create user');
-      }
-    } catch (error) {
-      toast.error('Error creating user');
-    }
+    BaseAxios.post('auth/signup', formData, {method: "POST"})
+      .then((res) => {
+        if (res.statusText === "Created") {
+          toast.success('User created successfully!');
+          refreshUsers();
+          onClose();
+        } else {
+          toast.error(data.message || 'Failed to create user');
+        }
+      })
+      .catch((err) => {toast.error('Error creating user'); console.log(err)})
   };
 
   return (

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { toast } from 'react-toastify';
+import BaseAxios from '../hooks/axiosConfig';
 
 function ReservationList() {
   const [reservations, setReservations] = useState([]);
@@ -13,21 +14,15 @@ function ReservationList() {
   }, [user]);
 
   const fetchUserReservations = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const userId = user.userId || user._id;
-      const response = await fetch(`http://localhost:3000/reservations/user/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      const data = await response.json();
-      const sortedReservations = Array.isArray(data) ? data.sort((a, b) => b._id.localeCompare(a._id)) : [];
+    // When testing on your home network use the ip address of the computer thats hosting the api server otherwise use localhost
+    // Axios config is located in the hooks "axiosConfig.jsx"
+    BaseAxios.get(`/reservations/user/${user.userId}`)
+    .then((req) => {
+      console.log(req)
+      const sortedReservations = Array.isArray(req.data) ? req.data.sort((a, b) => b._id.localeCompare(a._id)) : [];
       setReservations(sortedReservations);
-    } catch (error) {
-      toast.error('Failed to fetch reservations');
-      setReservations([]);
-    }
+    })
+    .catch((err) => {toast.error("An error has occurred check console for more details"); console.log(err); setReservations([]);})
   };
 
   return (

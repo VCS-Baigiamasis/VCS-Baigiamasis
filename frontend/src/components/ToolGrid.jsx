@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import ToolCard from './ToolCard';
+import BaseAxios from '../hooks/axiosConfig';
+import { toast } from "react-toastify"
 
 function ToolGrid({ searchCriteria = { searchText: '', category: '' }, limit = '' }) {
   const [products, setProducts] = useState([]);
@@ -16,17 +18,12 @@ function ToolGrid({ searchCriteria = { searchText: '', category: '' }, limit = '
   const totalPages = Math.ceil((searchResults && isSearchActive ? searchResults : products).length / toolsPerPage);
 
   useEffect(() => {
-    setCurrentPage(1)
-  }, [searchCriteria])
-
-  useEffect(() => {
-    fetch('http://localhost:3000/tools')
-      .then((res) => {
-        return res.json();
-      })
-      .then((data) => {
+    // When testing on your home network use the ip address of the computer thats hosting the api server otherwise use localhost
+    // Axios config is located in the hooks "axiosConfig.jsx"
+    BaseAxios.get('tools')
+      .then((req) => {
         // Filters out tools without any data
-        const tools = data.tools.map((item) => {
+        const tools = req.data.tools.map((item) => {
           if (item.name && item.description && item.price && item.images) {
             return item
           }
@@ -39,6 +36,7 @@ function ToolGrid({ searchCriteria = { searchText: '', category: '' }, limit = '
         }
       })
       .catch((error) => {
+        toast.error("fetch error check console logs")
         console.error('Fetch error:', error);
       });
   }, []);

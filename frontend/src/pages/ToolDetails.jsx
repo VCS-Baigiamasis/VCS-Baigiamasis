@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import ImageGallery from "react-image-gallery";
+import BaseAxios from '../hooks/axiosConfig';
 
 function ToolDetails() {
   // Setting default values to avoid errors while loading page
@@ -11,25 +12,25 @@ function ToolDetails() {
   const { id } = useParams();
 
   useEffect(() => {
-    fetch('http://localhost:3000/tools/' + id)
-      .then((res) => res.json())
-      .then((data) => {
-        const toolData = {
-          ...data.product,
-          toolType: data.product.toolType,
-          description: {
-            ...data.product.description,
-            nameRetail: data.product.description.nameRetail,
-            basePrice: data.product.description.basePrice,
-            imageURIs: data.product.description.imageURIs,
-            details: data.product.description.details
-          }
-        };
-
-        setTool(toolData);
-        setTotalPrice(toolData.description.basePrice || '');
-      })
-      .catch((err) => console.error(err));
+    // When testing on your home network use the ip address of the computer thats hosting the api server otherwise use localhost
+    // Axios config is located in the hooks "axiosConfig.jsx"
+    BaseAxios.get(`tools/${id}`)
+    .then((req) => {
+      const toolData = {
+        ...req.data.product,
+        toolType: req.data.product.toolType,
+        description: {
+          ...req.data.product.description,
+          nameRetail: req.data.product.description.nameRetail,
+          basePrice: req.data.product.description.basePrice,
+          imageURIs: req.data.product.description.imageURIs,
+          details: req.data.product.description.details
+        }
+      };
+      setTool(toolData);
+      setTotalPrice(toolData.description.basePrice || '');
+    })
+    .catch((err) => console.error(err));
   }, [id]);
 
   function decreaseQuantity() {

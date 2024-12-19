@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import UserReservationList from "../components/UserReservationList"
 import { useAuth } from "../hooks/useAuth"
+import BaseAxios from "../hooks/axiosConfig";
+// Is this path needed or is it now defunct?
 
 const Reservation = () => {
  const { user } = useAuth()
@@ -8,9 +10,14 @@ const Reservation = () => {
   const [error, setError] = useState(null)
 
   useEffect(() => {
+    BaseAxios.get('reservations')
+      .then((req) => {
+        console.log(req)
+      })
        const fetchReservations = async () => {
       try {
-        const response = await fetch('http://localhost:3000/reservations', {
+        // When testing on your home network use the ip address of the computer thats hosting the api server otherwise use localhost
+        const response = await fetch('http://192.168.0.21:3000/reservations', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

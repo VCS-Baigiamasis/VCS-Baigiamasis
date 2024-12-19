@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import AdminUsersNewForm from './AdminUsersNewForm';
+import BaseAxios from '../../hooks/axiosConfig';
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -15,35 +16,30 @@ const AdminUsers = () => {
   }, []);
 
   const fetchUsers = async () => {
-    try {
-      const response = await fetch('http://localhost:3000/api/users', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      const data = await response.json();
-      const sortedUsers = data.sort((a, b) => b._id.localeCompare(a._id));
-      setUsers(sortedUsers);
-      setLoading(false);
-    } catch (error) {
-      toast.error('Failed to fetch users');
-      setLoading(false);
-    }
+    BaseAxios.get('api/users')
+      .then((req) => {
+        const sortedUsers = req.data.sort((a, b) => b._id.localeCompare(a._id));
+        setUsers(sortedUsers);
+        setLoading(false);
+      })
+      .catch((err) => {
+        toast.error('Failed to fetch users');
+        setLoading(false);
+        console.log(err)
+      })
   };
 
   const handleDelete = async (userId) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
-      try {
-        const response = await fetch(`http://localhost:3000/api/users/${userId}`, {
-          method: 'DELETE'
-        });
-        if (response.ok) {
+      BaseAxios.delete(`api/users/${userId}`, {method: "DELETE"})
+        .then(() => {
           setUsers(users.filter((user) => user._id !== userId));
           toast.success('User deleted successfully');
-        }
-      } catch (error) {
-        toast.error('Failed to delete user');
-      }
+        })
+        .catch((err) => {
+          toast.error('Failed to delete user');
+          console.log(err)
+        })
     }
   };
 
